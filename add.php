@@ -1,5 +1,5 @@
 <?php
-// add.php
+// add.php 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $task = trim($_POST['task']);
