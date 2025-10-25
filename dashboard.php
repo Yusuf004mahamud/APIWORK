@@ -46,10 +46,11 @@ $goods = $db->getAllGoods();
 </head>
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
     <div class="container">
         <a class="navbar-brand fw-bold" href="#">Task Manager</a>
-        <div class="d-flex">
+        <div class="d-flex align-items-center">
             <span class="navbar-text text-white me-3">
                 👋 Welcome, <?= htmlspecialchars($_SESSION['username']) ?>
             </span>
@@ -58,13 +59,21 @@ $goods = $db->getAllGoods();
     </div>
 </nav>
 
+<!-- Main Content -->
 <div class="container my-5">
     <h2 class="mb-4 text-center">📋 Dashboard Overview</h2>
 
+    <!-- Button Controls -->
+    <div class="d-flex justify-content-center gap-3 mb-4">
+        <a href="generate_2fa.php" class="btn btn-warning">🟡 Enable 2FA</a>
+        <a href="#goodsTable" class="btn btn-info text-white">🔵 View Goods & Services</a>
+        <a href="logout.php" class="btn btn-danger">🔴 Logout</a>
+    </div>
+
     <div class="row">
         <!-- Users Table -->
-        <div class="col-md-6">
-            <div class="card shadow-sm mb-4">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
                 <div class="card-header bg-secondary text-white">
                     <h5 class="mb-0">Registered Users</h5>
                 </div>
@@ -80,15 +89,19 @@ $goods = $db->getAllGoods();
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($users as $u): ?>
-                                <tr>
-                                    <td><?= $u['id'] ?></td>
-                                    <td><?= htmlspecialchars($u['full_name']) ?></td>
-                                    <td><?= htmlspecialchars($u['username']) ?></td>
-                                    <td><?= htmlspecialchars($u['email']) ?></td>
-                                    <td><?= htmlspecialchars($u['created_at']) ?></td>
-                                </tr>
-                            <?php endforeach; ?>
+                            <?php if (count($users) > 0): ?>
+                                <?php foreach ($users as $u): ?>
+                                    <tr>
+                                        <td><?= $u['id'] ?></td>
+                                        <td><?= htmlspecialchars($u['full_name']) ?></td>
+                                        <td><?= htmlspecialchars($u['username']) ?></td>
+                                        <td><?= htmlspecialchars($u['email']) ?></td>
+                                        <td><?= htmlspecialchars($u['created_at']) ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr><td colspan="5" class="text-center text-muted">No users found.</td></tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -96,8 +109,8 @@ $goods = $db->getAllGoods();
         </div>
 
         <!-- Goods & Services Table -->
-        <div class="col-md-6">
-            <div class="card shadow-sm mb-4">
+        <div class="col-md-6 mb-4" id="goodsTable">
+            <div class="card shadow-sm">
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0">Goods & Services</h5>
                 </div>
@@ -113,15 +126,19 @@ $goods = $db->getAllGoods();
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($goods as $g): ?>
-                                <tr>
-                                    <td><?= $g['id'] ?></td>
-                                    <td><?= htmlspecialchars($g['name']) ?></td>
-                                    <td><?= htmlspecialchars($g['category']) ?></td>
-                                    <td><?= htmlspecialchars($g['price']) ?></td>
-                                    <td><?= htmlspecialchars($g['quantity']) ?></td>
-                                </tr>
-                            <?php endforeach; ?>
+                            <?php if (count($goods) > 0): ?>
+                                <?php foreach ($goods as $g): ?>
+                                    <tr>
+                                        <td><?= $g['id'] ?></td>
+                                        <td><?= htmlspecialchars($g['name']) ?></td>
+                                        <td><?= htmlspecialchars($g['category']) ?></td>
+                                        <td><?= htmlspecialchars($g['price']) ?></td>
+                                        <td><?= htmlspecialchars($g['quantity']) ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr><td colspan="5" class="text-center text-muted">No goods or services found.</td></tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
