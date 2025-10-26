@@ -1,0 +1,30 @@
+/* style.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+:root{
+  --accent:#764ba2;
+  --accent-2:#ff6a00;
+}
+body{min-height:100vh;background:url('assets/calendar.jpg') center/cover no-repeat;color:#222;}
+body::after{content:'';position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:0;}
+.navbar{position:fixed;top:0;left:0;width:100%;display:flex;justify-content:space-between;align-items:center;padding:18px 40px;z-index:5;}
+.navbar .logo{color:#fff;font-weight:700;}
+.navbar nav a{color:#fff;margin-left:18px;text-decoration:none;font-weight:600;}
+.hero{display:flex;min-height:100vh;align-items:center;z-index:1;position:relative;padding-top:60px;}
+.left,.right{flex:1;padding:60px;color:#fff;}
+.left h1{font-size:48px;margin-bottom:18px;text-shadow:0 6px 18px rgba(0,0,0,0.4);}
+.form-box{background:rgba(255,255,255,0.08);padding:28px;border-radius:12px;backdrop-filter:blur(6px);box-shadow:0 12px 30px rgba(0,0,0,0.35);color:#fff;}
+input{width:100%;padding:12px;border-radius:8px;border:none;margin-bottom:12px;background:rgba(255,255,255,0.9);color:#333;}
+button{padding:12px 18px;border-radius:8px;border:none;background:var(--accent-2);color:#fff;font-weight:700;cursor:pointer;}
+.services{padding:80px 60px;background:#fff;text-align:center;}
+.testimonials{padding:80px 60px;background:#f4f4f4;text-align:center;}
+/* Dashboard calendar styles */
+.calendar-wrap{padding:80px 40px;max-width:1100px;margin:0 auto;}
+.calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;}
+.calendar-day{background:#fff;border-radius:8px;padding:10px;min-height:120px;position:relative;overflow:hidden;}
+.calendar-day .date{position:absolute;top:8px;right:8px;font-weight:700;color:#666;}
+.task-block{background:var(--accent-2);color:#fff;padding:6px;border-radius:6px;margin-top:6px;display:block;font-size:13px;}
+.modal{position:fixed;inset:0;display:none;justify-content:center;align-items:center;background:rgba(0,0,0,0.5);z-index:50;}
+.modal .modal-content{background:#fff;padding:20px;border-radius:8px;width:320px;}
+.show{display:flex;}
