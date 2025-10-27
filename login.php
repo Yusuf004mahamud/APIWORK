@@ -1,8 +1,9 @@
 <?php
 require_once "config.php";
-require 'PHPMailer/src/PHPMailer.php';
-require 'PHPMailer/src/SMTP.php';
-require 'PHPMailer/src/Exception.php';
+require 'vendor/autoload.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 session_start();
 
@@ -25,16 +26,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // Send email with new code
             try {
-                $mail = new PHPMailer\PHPMailer\PHPMailer();
+                $mail = new PHPMailer(true);
                 $mail->isSMTP();
                 $mail->Host = 'smtp.gmail.com';
                 $mail->SMTPAuth = true;
-                $mail->Username = 'YOUR_EMAIL@gmail.com';   // your sending email
-                $mail->Password = 'YOUR_APP_PASSWORD';      // SMTP/app password
-                $mail->SMTPSecure = 'ssl';
+                $mail->Username = 'yusuf.mahamud@strathmore.edu';   // your sending email
+                $mail->Password = 'ukql spey nido jmvh';      // SMTP/app password
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
                 $mail->Port = 465;
 
-                $mail->setFrom('YOUR_EMAIL@gmail.com', 'Task Manager');
+                $mail->setFrom('yusuf.mahamud@strathmore.edu', 'Task Manager');
                 $mail->addAddress($email);
                 $mail->Subject = "Verify your email";
                 $mail->Body = "Hello {$user['name']},\n\nYour new verification code is: $verification_code";
