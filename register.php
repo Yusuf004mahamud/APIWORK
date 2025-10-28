@@ -1,13 +1,19 @@
 <?php
 require_once "config.php";
-require 'PHPMailer/src/PHPMailer.php';
-require 'PHPMailer/src/SMTP.php';
-require 'PHPMailer/src/Exception.php';
+
+// Composer autoload for PHPMailer
+require 'vendor/autoload.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 session_start();
+
+$error = '';
+$email_status = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = trim($_POST["name"]);
@@ -35,39 +41,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Attempt to send verification email
             $email_sent = false;
             try {
-                $mail = new PHPMailer\PHPMailer\PHPMailer();
+                $mail = new PHPMailer(true);
                 $mail->isSMTP();
                 $mail->Host = 'smtp.gmail.com';
                 $mail->SMTPAuth = true;
-                $mail->Username = 'yusuf.mahamud@strathmore.edu';      // Replace with your email
-                $mail->Password = 'ukql spey nido jmvh';         // Replace with your app password
-                $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+                $mail->Username = 'yusuf.mahamud@strathmore.edu';      // Your email
+                $mail->Password = 'ukql spey nido jmvh';               // Your app password
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
                 $mail->Port = 465;
 
-                // Enable debug
-                $mail->SMTPDebug = 2;
-                $mail->Debugoutput = 'html';
-
-                $mail->setFrom('YOUR_EMAIL@gmail.com', 'Task Manager');
+                $mail->setFrom('yusuf.mahamud@strathmore.edu', 'Task Manager');
                 $mail->addAddress($email);
                 $mail->Subject = "Verify your email";
                 $mail->Body = "Hello $name,\n\nYour verification code is: $verification_code";
 
-                if($mail->send()) {
-                    $email_sent = true;
-                }
-            } catch (Exception $e) {
-                echo "<p style='color:red;'>❌ Email could not be sent. Error: {$mail->ErrorInfo}</p>";
+                $email_sent = $mail->send();
+                $email_status = $email_sent ? 'Verification email sent!' : 'Email could not be sent. You can continue to the calendar.';
+            } catch (PHPMailer\PHPMailer\Exception $e) {
+                $email_status = 'Email could not be sent. You can continue to the calendar.';
+                error_log("PHPMailer Error: " . $e->getMessage());
             }
 
-            // Auto-login (even if email fails)
+            // Auto-login
             $_SESSION["user_id"] = $user_id;
             $_SESSION["username"] = $name;
 
-            // If email sent, redirect to verify page; else go to calendar
+            // Redirect with optional email fallback message
             if($email_sent){
                 header("Location: verify.php?email=" . urlencode($email));
             } else {
+                $_SESSION['email_error'] = $email_status; // store message for calendar page
                 header("Location: calendar.php");
             }
             exit();
@@ -80,23 +83,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Register - Task Manager</title>
-<style>
-body { margin:0; font-family:Arial,sans-serif; background:#f4f7f8; height:100vh; display:flex; justify-content:center; align-items:center; }
-.container { background:#fff; padding:40px; border-radius:10px; width:350px; box-shadow:0 8px 20px rgba(0,0,0,0.1); text-align:center; }
-h2 { margin-bottom:30px; color:#333; }
-input[type=text], input[type=email], input[type=password] { width:100%; padding:12px; margin:10px 0; border-radius:6px; border:1px solid #ccc; box-sizing:border-box; }
-button { width:100%; padding:12px; background:#28a745; color:white; border:none; border-radius:6px; cursor:pointer; font-size:16px; }
-button:hover { background:#218838; }
-a { display:block; margin-top:15px; text-decoration:none; color:#28a745; }
-a:hover { text-decoration:underline; }
-.error { color:red; margin-bottom:15px; }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
+<div class="auth-container">
+<div class="auth-box">
 <h2>Create Account</h2>
-<?php if(isset($error)) echo "<div class='error'>$error</div>"; ?>
+<?php
+if(!empty($error)) echo "<div class='error'>$error</div>";
+if(!empty($email_status)) echo "<div class='status'>$email_status</div>";
+?>
 <form method="POST">
     <input type="text" name="name" placeholder="Full Name" required>
     <input type="email" name="email" placeholder="Email" required>
@@ -104,6 +102,7 @@ a:hover { text-decoration:underline; }
     <button type="submit">Register</button>
 </form>
 <a href="login.php">Already have an account?</a>
+</div>
 </div>
 </body>
 </html>

@@ -69,29 +69,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login - Task Manager</title>
-<style>
-body { font-family: Arial, sans-serif; background:#f4f7f8; display:flex; justify-content:center; align-items:center; height:100vh; }
-.container { background:#fff; padding:40px; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.1); width:350px; text-align:center; }
-h2 { margin-bottom:30px; color:#333; }
-input[type=email], input[type=password] { width:100%; padding:12px; margin:10px 0; border-radius:6px; border:1px solid #ccc; }
-button { width:100%; padding:12px; background:#007bff; color:white; border:none; border-radius:6px; cursor:pointer; font-size:16px; }
-button:hover { background:#0056b3; }
-.error { color:red; text-align:center; margin-bottom:10px; }
-a { display:block; text-align:center; margin-top:15px; text-decoration:none; color:#007bff; }
-a:hover { text-decoration:underline; }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
+<div class="auth-container">
+<div class="auth-box">
 <h2>Login</h2>
 <?php if(isset($error)) echo "<div class='error'>$error</div>"; ?>
 <form action="" method="POST">
     <input type="email" name="email" placeholder="Email" required>
     <input type="password" name="password" placeholder="Password" required>
-    <button type="submit">Login</button>
+    <button type="submit" class="login-btn">Login</button>
 </form>
 <a href="register.php">Don't have an account? Register</a>
+</div>
 </div>
 </body>
 </html>
