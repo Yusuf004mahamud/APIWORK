@@ -32,53 +32,102 @@ $events_json = json_encode($events);
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Task Calendar</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- FullCalendar CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css" rel="stylesheet">
-    <!-- Bootstrap CSS -->
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f4f6f9;
-            font-family: 'Segoe UI', sans-serif;
-        }
-        #calendar {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-        }
-        .fc-event {
-            cursor: pointer;
-        }
-        h2 {
-            margin: 30px 0;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>🌈 My Task Calendar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- FullCalendar & Bootstrap -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css" rel="stylesheet">
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+        min-height: 100vh;
+        font-family: 'Poppins', sans-serif;
+        color: #333;
+    }
+    h2 {
+        margin-top: 30px;
+        font-weight: 600;
+        color: #004aad;
+    }
+    #calendar {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        transition: transform 0.2s ease-in-out;
+    }
+    #calendar:hover {
+        transform: scale(1.01);
+    }
+    .navbar {
+        background: rgba(255,255,255,0.9);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .navbar-brand {
+        font-weight: 600;
+        color: #007bff !important;
+    }
+    .btn-primary {
+        background: #007bff;
+        border: none;
+        transition: 0.3s;
+    }
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+    .modal-content {
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .fc-event {
+        border: none !important;
+        font-weight: 500;
+    }
+    .footer {
+        text-align: center;
+        padding: 15px;
+        color: white;
+        font-size: 14px;
+        margin-top: 40px;
+        opacity: 0.9;
+    }
+</style>
 </head>
 <body>
 
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light">
+  <a class="navbar-brand" href="#">🗓️ Task Calendar</a>
+  <div class="ml-auto">
+      <a href="logout.php" class="btn btn-outline-primary btn-sm">Logout</a>
+  </div>
+</nav>
+
+<!-- Main content -->
 <div class="container py-4">
-    <h2 class="text-center text-primary">📅 Task Calendar</h2>
+    <h2 class="text-center mb-4">Your Upcoming Tasks</h2>
     <div id="calendar"></div>
 </div>
 
-<!-- Modal: Add Event -->
+<!-- Modal -->
 <div class="modal fade" id="event_entry_modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
 	<div class="modal-dialog modal-md" role="document">
 		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="modalLabel">Add New Event</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			<div class="modal-header bg-primary text-white">
+				<h5 class="modal-title" id="modalLabel">Add New Task</h5>
+				<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
 			<div class="modal-body">
 				<div class="form-group">
-				  <label for="event_name">Event Name</label>
-				  <input type="text" id="event_name" class="form-control" placeholder="Enter event name">
+				  <label for="event_name">Task Title</label>
+				  <input type="text" id="event_name" class="form-control" placeholder="Enter task title">
 				</div>
 				<div class="form-row">
 					<div class="form-group col-md-6">
@@ -92,10 +141,15 @@ $events_json = json_encode($events);
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-primary" onclick="save_event()">Save Event</button>
+				<button type="button" class="btn btn-primary" onclick="save_event()">Save Task</button>
 			</div>
 		</div>
 	</div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <p>✨ Stay organized. Stay productive. ✨</p>
 </div>
 
 <!-- JS Libraries -->
@@ -106,7 +160,6 @@ $events_json = json_encode($events);
 
 <script>
 $(document).ready(function() {
-    // Use PHP-encoded tasks as events
     var events = <?php echo $events_json; ?>;
 
     $('#calendar').fullCalendar({
@@ -133,7 +186,7 @@ function save_event() {
     var event_end_date = $("#event_end_date").val();
 
     if (event_name === "" || event_start_date === "" || event_end_date === "") {
-        alert("Please enter all required details.");
+        alert("Please fill in all fields.");
         return;
     }
 
