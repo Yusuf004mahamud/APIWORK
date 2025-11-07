@@ -29,117 +29,152 @@ $events_json = json_encode($events);
 <html>
 <head>
 <title>Task Calendar</title>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css' rel='stylesheet' />
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js'></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<header class="calendar-header">
-<h2>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h2>
-<div>
-    <a href="change_password.php">Change Password</a>
-    <a href="logout.php">Logout</a>
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width"/>
+<!-- CSS for full calender -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css" rel="stylesheet" />
+<!-- JS for jQuery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<!-- JS for full calender -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js"></script>
+<!-- bootstrap css and js -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"/>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<div id="calendar"></div>
+<div class="row">
+    <div class="col-lg-12">
+      <h2 align="center">Task Calendar</h2>
+      <div id="calendar"></div>
+    </div>
 </div>
-</header>
-
-<div class="calendar-container">
-<form id="taskForm">
-    <input type="text" name="title" placeholder="Task Title" required>
-    <select name="priority">
-        <option value="low">Low</option>
-        <option value="medium" selected>Medium</option>
-        <option value="high">High</option>
-    </select>
-    <input type="datetime-local" name="due_date" required>
-    <select name="status">
-        <option value="pending">Pending</option>
-        <option value="in_progress">In Progress</option>
-        <option value="completed">Completed</option>
-    </select>
-    <button type="submit">Add Task</button>
-</form>
-
-<div id='calendar'></div>
+<!-- Start popup dialog box -->
+<div class="modal fade" id="event_entry_modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-md" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modalLabel">Add New Event</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">×</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="img-container">
+					<div class="row">
+						<div class="col-sm-12">  
+							<div class="form-group">
+							  <label for="event_name">Event name</label>
+							  <input type="text" name="event_name" id="event_name" class="form-control" placeholder="Enter your event name">
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-6">  
+							<div class="form-group">
+							  <label for="event_start_date">Event start</label>
+							  <input type="date" name="event_start_date" id="event_start_date" class="form-control onlydatepicker" placeholder="Event start date">
+							 </div>
+						</div>
+						<div class="col-sm-6">  
+							<div class="form-group">
+							  <label for="event_end_date">Event end</label>
+							  <input type="date" name="event_end_date" id="event_end_date" class="form-control" placeholder="Event end date">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" onclick="save_event()">Save Event</button>
+			</div>
+		</div>
+	</div>
 </div>
+<!-- End popup dialog box -->
+ <script>
+$(document).ready(function() {
+	display_events();
+}); //end document.ready block
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var calendarEl = document.getElementById('calendar');
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-        },
-        events: <?php echo $events_json; ?>,
-        editable: true,
+function display_events() {
+	var events = new Array();
+$.ajax({
+    url: 'display_event.php',  
+    dataType: 'json',
+    success: function (response) {
+         
+    var result=response.data;
+    $.each(result, function (i, item) {
+    	events.push({
+            event_id: result[i].event_id,
+            title: result[i].title,
+            start: result[i].start,
+            end: result[i].end,
+            color: result[i].color,
+            url: result[i].url
+        }); 	
+    })
+	var calendar = $('#calendar').fullCalendar({
+	    defaultView: 'month',
+		 timeZone: 'local',
+	    editable: true,
         selectable: true,
-        eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false }, // show HH:MM
-        eventClick: function(info) {
-            let action = prompt("Enter 'edit' to update or 'delete' to remove task:");
-            if(action === 'edit') {
-                let newTitle = prompt("New title:", info.event.title.split(' [')[0]);
-                if(newTitle !== null) {
-                    let newStatus = prompt("New status (pending, in_progress, completed):", "pending");
-                    let newPriority = prompt("Priority (low, medium, high):", "medium");
-                    axios.post('calendar.php', new URLSearchParams({
-                        action: 'update',
-                        id: info.event.id,
-                        title: newTitle,
-                        status: newStatus,
-                        priority: newPriority
-                    })).then(() => {
-                        info.event.setProp('title', newTitle + ' [' + newStatus + ']');
-                        alert("Task updated!");
-                    }).catch(err => alert(err));
-                }
-            } else if(action === 'delete') {
-                if(confirm("Are you sure to delete this task?")) {
-                    axios.post('calendar.php', new URLSearchParams({
-                        action: 'delete',
-                        id: info.event.id
-                    })).then(() => {
-                        info.event.remove();
-                        alert("Task deleted!");
-                    }).catch(err => alert(err));
-                }
-            }
-        },
-        eventDrop: function(info) {
-            axios.post('calendar.php', new URLSearchParams({
-                action: 'update',
-                id: info.event.id,
-                due_date: info.event.start.toISOString()
-            })).then(()=>{ alert("Task date updated!"); })
-            .catch(err => alert(err));
-        }
-    });
-    calendar.render();
+		selectHelper: true,
+        select: function(start, end) {
+				alert(start);
+				alert(end);
+				$('#event_start_date').val(moment(start).format('YYYY-MM-DD'));
+				$('#event_end_date').val(moment(end).format('YYYY-MM-DD'));
+				$('#event_entry_modal').modal('show');
+			},
+        events: events,
+	    eventRender: function(event, element, view) { 
+            element.bind('click', function() {
+					alert(event.event_id);
+				});
+    	}
+		}); //end fullCalendar block	
+	  },//end success block
+	  error: function (xhr, status) {
+	  alert(response.msg);
+	  }
+	});//end ajax block	
+}
 
-    // Add new task
-    document.getElementById('taskForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        let formData = new FormData(this);
-        formData.append('action', 'add');
-        axios.post('calendar.php', formData)
-        .then(res => {
-            let t = res.data;
-            calendar.addEvent({
-                id: t.id,
-                title: t.title + ' [' + t.status + ']',
-                start: t.due_date,
-                color: t.status=='completed'?'#28a745':(t.status=='in_progress'?'#ffc107':'#dc3545')
-            });
-            this.reset();
-            alert("Task added!");
-        }).catch(err => alert(err));
-    });
-});
+function save_event()
+{
+var event_name=$("#event_name").val();
+var event_start_date=$("#event_start_date").val();
+var event_end_date=$("#event_end_date").val();
+if(event_name=="" || event_start_date=="" || event_end_date=="")
+{
+alert("Please enter all required details.");
+return false;
+}
+$.ajax({
+ url:"save_event.php",
+ type:"POST",
+ dataType: 'json',
+ data: {event_name:event_name,event_start_date:event_start_date,event_end_date:event_end_date},
+ success:function(response){
+   $('#event_entry_modal').modal('hide');  
+   if(response.status == true)
+   {
+	alert(response.msg);
+	location.reload();
+   }
+   else
+   {
+	 alert(response.msg);
+   }
+  },
+  error: function (xhr, status) {
+  console.log('ajax error = ' + xhr.statusText);
+  alert(response.msg);
+  }
+});    
+return false;
+}
 </script>
-
-</body>
-</html>
