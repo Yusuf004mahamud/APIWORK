@@ -7,24 +7,19 @@ if (!isset($_SESSION['user_id'])) {
     redirect('login.php');
 }
 
-// Fetch tasks for the logged-in user
-$user_id = $_SESSION['user_id'];
-$stmt = $pdo->prepare("SELECT task_id, title, due_date, status, priority 
-                       FROM tasks 
-                       WHERE user_id = :user_id 
-                       ORDER BY due_date ASC");
-$stmt->execute(['user_id' => $user_id]);
-$tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Fetch events from calendar_event_master
+$stmt = $pdo->query("SELECT * FROM calendar_event_master ORDER BY event_start_date ASC");
+$events_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Prepare events for FullCalendar
 $events = [];
-foreach ($tasks as $task) {
+foreach ($events_data as $event) {
     $events[] = [
-        'id' => $task['task_id'],
-        'title' => $task['title'] . ' [' . ucfirst($task['status']) . ']',
-        'start' => $task['due_date'],
-        'color' => $task['status'] == 'completed' ? '#28a745' :
-                  ($task['status'] == 'in_progress' ? '#ffc107' : '#dc3545')
+        'id' => $event['event_id'],
+        'title' => $event['event_name'],
+        'start' => date('Y-m-d', strtotime($event['event_start_date'])),
+        'end' => date('Y-m-d', strtotime($event['event_end_date'] . ' +1 day')),
+        'color' => '#007bff'
     ];
 }
 $events_json = json_encode($events);
@@ -104,6 +99,7 @@ $events_json = json_encode($events);
 <nav class="navbar navbar-expand-lg navbar-light">
   <a class="navbar-brand" href="#">🗓️ Task Calendar</a>
   <div class="ml-auto">
+      <a href="change_password.php" class="btn btn-outline-secondary btn-sm mr-2">Change Password</a>
       <a href="logout.php" class="btn btn-outline-primary btn-sm">Logout</a>
   </div>
 </nav>
